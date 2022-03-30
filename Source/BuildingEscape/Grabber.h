@@ -5,50 +5,36 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "MainActorComponent.h"
 #include "Grabber.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BUILDINGESCAPE_API UGrabber : public UActorComponent
+class BUILDINGESCAPE_API UGrabber : public UMainActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
 	UGrabber();
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
-
+private:
 	UPhysicsHandleComponent *PhysicsHandle = nullptr;
 	UInputComponent *InputComponent = nullptr;
 
-private:
+	FVector GetPlayerViewPointLocation() const;
+	FVector GetPlayerViewPointReach() const;
+	FHitResult GetFirstPhysicsBodyInReach(FVector PlayerViewPointLocation, FVector LineTraceEnd) const;
+
 	UPROPERTY(EditAnywhere)
-	float Reach = 100.f;
+	float Reach = 200.f;
 
-	template <typename T>
-	void InitComponent(T **Component, void (UGrabber::*Callback)())
-	{
-		*Component = GetOwner()->FindComponentByClass<T>();
-
-		UE_LOG(LogTemp,
-					 Warning,
-					 TEXT("%s%s found on %s"),
-					 *FString(Component ? "" : "No "),
-					 *FString(typeid(T).name()),
-					 *GetOwner()->GetName());
-		if (Callback)
-		{
-			((*this).*Callback)();
-		}
-	};
-
-	void LineTrace();
 	void BindInput();
 	void Grab();
+	void Release();
 };

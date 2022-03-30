@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/AudioComponent.h"
 #include "Engine/TriggerVolume.h"
+#include "MainActorComponent.h"
 #include "OpenDoor.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BUILDINGESCAPE_API UOpenDoor : public UActorComponent
+class BUILDINGESCAPE_API UOpenDoor : public UMainActorComponent
 {
 	GENERATED_BODY()
 
@@ -25,12 +27,21 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 private:
+	float GetTotalMassOfActors() const;
 	void RotateDoor(float DeltaTime, float FinalYaw, float Speed);
 	void OpenDoor(float DeltaTime);
 	void CloseDoor(float DeltaTime);
 
+	UAudioComponent *AudioComponent = nullptr;
+
 	float InitialYaw;
 	float CurrentYaw;
+
+	bool OpenDoorSoundPlayed = false;
+	bool CloseDoorSoundPlayed = false;
+
+	UPROPERTY(EditAnywhere)
+	float TargetMass = 10.f;
 
 	UPROPERTY(EditAnywhere)
 	float TargetYaw = 90.f;
@@ -38,17 +49,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume *PressurePlate;
 
-	UPROPERTY(EditAnywhere)
-	AActor *OpeningActor;
-
 	float DoorLastOpened = 0.f;
 
 	UPROPERTY(EditAnywhere)
 	float DoorOpenSpeed = 2.f;
 
 	UPROPERTY(EditAnywhere)
-	float DoorCloseSpeed = 5.f;
+	float DoorCloseSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay = 1.f;
+	float DoorCloseDelay = 0.f;
 };
